@@ -1,4 +1,4 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import express from 'express'
 import 'dotenv/config'
 import cors from 'cors'
@@ -43,6 +43,11 @@ app.get('/destinations', async (req, res) => {
     res.send(result)
 })
 
+app.get('/destinations/:id', async (req, res) => {
+    const { id } = req.params
+    const result = await destinationCollection.findOne({ _id: new ObjectId(id) })
+    res.send(result)
+})
 
 app.get('/', (req, res) => {
     res.send('Hello World!')
