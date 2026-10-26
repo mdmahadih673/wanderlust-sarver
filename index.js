@@ -49,6 +49,26 @@ app.get('/destinations/:id', async (req, res) => {
     res.send(result)
 })
 
+app.patch('/destinations/:id', async (req, res) => {
+    const { id } = req.params
+    const data = { ...req.body }
+    delete data._id
+
+    const result = await destinationCollection.updateOne(
+        { _id: new ObjectId(id) },
+        { $set: data }
+    )
+    res.send(result)
+})
+
+app.delete('/destinations/:id', async (req, res) => {
+    const { id } = req.params
+    const result = await destinationCollection.deleteOne({ _id: new ObjectId(id) })
+    res.send(result)
+})
+
+
+
 app.get('/', (req, res) => {
     res.send('Hello World!')
 })
