@@ -28,12 +28,12 @@ const mongodbClirnt = await connectToMongoDB()
 
 const db = mongodbClirnt.db("wanderlust")
 const destinationCollection = db.collection("destination")
+const bookingCollection = db.collection('bookings')
 
 
 app.post('/add', async (req, res) => {
     const data = req.body
     const result = await destinationCollection.insertOne(data)
-    console.log(result);
 
     res.send(result)
 })
@@ -67,6 +67,28 @@ app.delete('/destinations/:id', async (req, res) => {
     res.send(result)
 })
 
+app.post('/booking', async (req, res) => {
+    try {
+        const data = { ...req.body }
+        // _id belongs to the destination — let Mongo mint a fresh id per booking,
+        // otherwise booking the same destination twice hits a duplicate-key error.
+        data.destinationId = data._id
+        delete data._id
+
+        const result = await bookingCollection.insertOne(data)
+        res.send(result)
+    } catch (err) {
+        console.error('POST /booking failed:', err)
+        res.status(500).json({ error: err.message })
+    }
+})
+
+
+app.get('/my-booking/:email', async (req, res) => {
+    const { email } = req.params
+    const result = await bookingCollection.find({ email: email }).toArray()
+    res.send(result)
+})
 
 
 app.get('/', (req, res) => {
