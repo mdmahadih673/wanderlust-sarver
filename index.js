@@ -108,7 +108,7 @@ app.get('/my-booking/:email', async (req, res) => {
 
 app.delete('/my-bookings/:id', async (req, res) => {
     const { id } = req.params
-    const result = await bookingCollection.deleteOne({ _id: id })
+    const result = await bookingCollection.deleteOne({ _id: new ObjectId(id) })
     res.send(result)
 })
 
