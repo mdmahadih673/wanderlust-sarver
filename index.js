@@ -75,6 +75,21 @@ app.post('/booking', async (req, res) => {
         data.destinationId = data._id
         delete data._id
 
+        // One active booking per account per destination: a cancelled booking
+        // doesn't count, so the destination becomes bookable again after a cancel.
+        const existing = await bookingCollection.findOne({
+            email: data.email,
+            destinationId: data.destinationId,
+            status: { $ne: 'Cancelled' },
+        })
+        if (existing) {
+            return res.status(409).json({
+                error: 'already_booked',
+                message: 'You have already booked this destination.',
+            })
+        }
+
+        data.status = 'Confirmed'
         const result = await bookingCollection.insertOne(data)
         res.send(result)
     } catch (err) {
@@ -87,6 +102,13 @@ app.post('/booking', async (req, res) => {
 app.get('/my-booking/:email', async (req, res) => {
     const { email } = req.params
     const result = await bookingCollection.find({ email: email }).toArray()
+    res.send(result)
+})
+
+
+app.get('/mybookings/:id',async(req, res)=>{
+    const {id} = req.params
+    const result = await bookingCollection.deleteOne({_id: id})
     res.send(result)
 })
 
